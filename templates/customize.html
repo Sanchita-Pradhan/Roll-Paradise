@@ -1,0 +1,272 @@
+{% extends "base.html" %} {% block title %}Customize Your Roll - Roll Paradise{%
+endblock %} {% block content %}
+<section class="customize-section">
+  <div class="container">
+    <h2 class="section-title">Build Your Own Roll</h2>
+    <p class="section-subtitle">
+      Choose your favorite ingredients and see your custom roll come to life!
+    </p>
+    <div class="customize-layout">
+      <div class="ingredients-list">
+        <h3>Ingredients</h3>
+        <form id="customize-form">
+          <div class="ingredients-grid">
+            {% for ingredient in ingredients %}
+            <label class="ingredient-option">
+              <input
+                type="checkbox"
+                name="ingredient"
+                value="{{ ingredient.id }}"
+                data-price="{{ ingredient.price }}"
+                data-name="{{ ingredient.name }}"
+                data-image="{{ ingredient.image }}"
+                {%
+                if
+                ingredient.base
+                %}checked
+                disabled{%
+                endif
+                %}
+              />
+              <img
+                src="{{ ingredient.image }}"
+                alt="{{ ingredient.name }}"
+                class="ingredient-img"
+                onerror="this.onerror=null;this.src='/static/images/placeholder.png';"
+              />
+              <span class="ingredient-name">{{ ingredient.name }}</span>
+              <span class="ingredient-price"
+                >₹{{ '%.2f'|format(ingredient.price|default(0)) }}</span
+              >
+            </label>
+            {% endfor %}
+          </div>
+        </form>
+      </div>
+      <div class="custom-roll-preview">
+        <h3>Your Roll</h3>
+        <div class="roll-visual" id="roll-visual">
+          <img
+            src="/static/images/ingredient_wrap.png"
+            alt="Tortilla Wrap"
+            class="roll-base"
+          />
+          <!-- Ingredient images will be layered here -->
+        </div>
+        <div class="custom-roll-price">
+          <span>Total Price: </span>
+          <span id="custom-roll-price">₹83.00</span>
+        </div>
+        <button class="btn btn-primary" id="add-custom-roll">
+          Add to Cart
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %} {% block extra_js %}
+<script>
+  const ingredientCheckboxes = document.querySelectorAll(
+    'input[name="ingredient"]'
+  );
+  const priceDisplay = document.getElementById("custom-roll-price");
+  const rollVisual = document.getElementById("roll-visual");
+  let ingredientData = Array.from(ingredientCheckboxes).map((cb) => ({
+    id: cb.value,
+    name: cb.dataset.name,
+    price: parseFloat(cb.dataset.price),
+    image: cb.dataset.image,
+    checked: cb.checked,
+  }));
+
+  function updatePriceAndVisual() {
+    let total = 0;
+    rollVisual.innerHTML =
+      '<img src="/static/images/ingredient_wrap.png" alt="Tortilla Wrap" class="roll-base">';
+    ingredientCheckboxes.forEach((cb) => {
+      if (cb.checked) {
+        total += parseFloat(cb.dataset.price);
+        if (!cb.disabled) {
+          // Layer ingredient image
+          const img = document.createElement("img");
+          img.src = cb.dataset.image;
+          img.alt = cb.dataset.name;
+          img.className = "roll-ingredient-img";
+          rollVisual.appendChild(img);
+        }
+      }
+    });
+    priceDisplay.textContent = `₹${total.toFixed(2)}`;
+  }
+
+  ingredientCheckboxes.forEach((cb) => {
+    cb.addEventListener("change", updatePriceAndVisual);
+  });
+
+  document
+    .getElementById("add-custom-roll")
+    .addEventListener("click", function () {
+      const selected = Array.from(ingredientCheckboxes)
+        .filter((cb) => cb.checked)
+        .map((cb) => cb.value);
+      const price = priceDisplay.textContent.replace("₹", "");
+      
+      // Get selected ingredient names for display
+      const selectedIngredients = Array.from(ingredientCheckboxes)
+        .filter((cb) => cb.checked)
+        .map((cb) => cb.dataset.name);
+      
+      // Use the correct API endpoint for custom rolls
+      fetch("/api/add_custom_roll", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: "Custom Roll",
+          ingredients: selectedIngredients,
+          price: parseFloat(price),
+          image: "/static/images/ingredient_wrap.png"
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            showToast("Custom roll added to cart! 🌯", "success");
+            updateCartDisplay(data.cart_count, data.cart_total);
+          } else {
+            showToast(data.message || "Error adding to cart.", "error");
+          }
+        })
+        .catch((error) => {
+          showToast("Error adding to cart.", "error");
+        });
+    });
+
+  // Toast notification function
+  function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+        <span>${message}</span>
+    `;
+    
+    const container = document.getElementById('toast-container');
+    if (container) {
+      container.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.classList.add('show');
+      }, 100);
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+          if (container.contains(toast)) {
+            container.removeChild(toast);
+          }
+        }, 300);
+      }, 3000);
+    }
+  }
+
+  // Update cart display function
+  function updateCartDisplay(cartCount, cartTotal) {
+    const cartCountElement = document.getElementById('cart-count');
+    if (cartCountElement) {
+      cartCountElement.textContent = cartCount;
+    }
+    
+    // You can also update cart total if needed
+    const cartTotalElement = document.getElementById('cart-total');
+    if (cartTotalElement) {
+      cartTotalElement.textContent = `₹${cartTotal.toFixed(2)}`;
+    }
+  }
+
+  // Initial update
+  updatePriceAndVisual();
+</script>
+<style>
+  .customize-layout {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  .ingredients-list {
+    flex: 1 1 300px;
+  }
+  .ingredients-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .ingredient-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 1rem;
+    width: 120px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    cursor: pointer;
+    transition: box-shadow 0.2s;
+  }
+  .ingredient-option:hover {
+    box-shadow: 0 4px 16px rgba(255, 107, 53, 0.12);
+  }
+  .ingredient-img {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    margin-bottom: 0.5rem;
+  }
+  .ingredient-name {
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+  }
+  .ingredient-price {
+    color: #ff6b35;
+    font-size: 0.95rem;
+  }
+  .custom-roll-preview {
+    flex: 1 1 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 1rem;
+  }
+  .roll-visual {
+    position: relative;
+    width: 160px;
+    height: 160px;
+    margin-bottom: 1rem;
+  }
+  .roll-base {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 1;
+  }
+  .roll-ingredient-img {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 2;
+    opacity: 0.92;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .custom-roll-price {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #ff6b35;
+  }
+</style>
+{% endblock %}

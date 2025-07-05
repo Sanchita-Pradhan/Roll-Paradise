@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Roll Paradise - Delicious Food Rolls{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800;900&family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <a href="{{ url_for('home') }}">
+                    <div class="logo-container">
+                        <div class="logo-text">
+                            <span class="logo-brand">Roll</span>
+                            <span class="logo-paradise">Paradise</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <ul class="nav-menu" id="nav-menu">
+                <li><a href="{{ url_for('home') }}" class="nav-link {% if request.endpoint == 'home' %}active{% endif %}">
+                    <i class="fas fa-home"></i> Home</a></li>
+                <li><a href="{{ url_for('menu') }}" class="nav-link {% if request.endpoint == 'menu' %}active{% endif %}">
+                    <i class="fas fa-utensils"></i> Menu</a></li>
+                <li><a href="{{ url_for('drinks') }}" class="nav-link {% if request.endpoint == 'drinks' %}active{% endif %}">
+                    <i class="fas fa-glass-martini-alt"></i> Drinks</a></li>
+                <li><a href="{{ url_for('customize') }}" class="nav-link {% if request.endpoint == 'customize' %}active{% endif %}">
+                    <i class="fas fa-palette"></i> Customize</a></li>
+                <li><a href="{{ url_for('about') }}" class="nav-link {% if request.endpoint == 'about' %}active{% endif %}">
+                    <i class="fas fa-users"></i> About</a></li>
+                <li><a href="{{ url_for('contact') }}" class="nav-link {% if request.endpoint == 'contact' %}active{% endif %}">
+                    <i class="fas fa-envelope"></i> Contact</a></li>
+                <li class="auth-nav-item">
+                    <!-- Show when not signed in -->
+                    <a href="#" class="nav-link signin-button" style="display: {{ 'none' if session.get('user_email') else 'block' }}" onclick="showModal(); return false;">
+                        <i class="fas fa-user"></i> Sign In</a>
+                    <!-- Show when signed in -->
+                    <div class="user-info" style="display: {{ 'block' if session.get('user_email') else 'none' }}">
+                        <a href="{{ url_for('profile') }}" class="nav-link profile-link">
+                            <i class="fas fa-user-circle"></i> Profile
+                        </a>
+                        <button class="logout-button" onclick="logout()">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </div>
+                </li>
+               
+                <li>
+                    <a href="{{ url_for('orders') }}" class="nav-link order-link" style="margin-left:1rem;">
+                        <i class="fas fa-shopping-bag"></i> Order
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{{ url_for('cart') }}" class="nav-link cart-icon" id="cart-link" style="margin-left:2rem;">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-count" id="cart-count">{{ session.cart|length if session.cart else 0 }}</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-wave">
+            <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z"></path>
+            </svg>
+        </div>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>
+                        <div class="footer-logo-container">
+                            <div class="footer-logo-icon-wrapper">
+                                <svg class="footer-logo-svg" viewBox="0 0 50 50" width="35" height="35">
+                                    <!-- Roll/Burrito shape -->
+                                    <ellipse cx="25" cy="25" rx="20" ry="8" fill="#FF6B35" stroke="#E55A2B" stroke-width="1"/>
+                                    <!-- Filling inside -->
+                                    <ellipse cx="25" cy="25" rx="16" ry="6" fill="#FFD93D"/>
+                                    <!-- Lettuce -->
+                                    <ellipse cx="25" cy="23" rx="14" ry="3" fill="#90EE90"/>
+                                    <!-- Meat -->
+                                    <ellipse cx="25" cy="27" rx="12" ry="2" fill="#8B4513"/>
+                                    <!-- Steam effect -->
+                                    <path d="M15 15 Q20 10 25 15" stroke="#FFE4B5" stroke-width="2" fill="none" opacity="0.6"/>
+                                    <path d="M30 12 Q35 7 40 12" stroke="#FFE4B5" stroke-width="2" fill="none" opacity="0.6"/>
+                                    <path d="M35 18 Q40 13 45 18" stroke="#FFE4B5" stroke-width="2" fill="none" opacity="0.6"/>
+                                </svg>
+                            </div>
+                            <div class="footer-logo-text">
+                                <span class="footer-logo-brand">Roll</span>
+                                <span class="footer-logo-paradise">Paradise</span>
+                            </div>
+                        </div>
+                    </h3>
+                    <p>Serving culinary masterpieces wrapped in pure deliciousness since 2020. Every roll tells a story of flavor!</p>
+                    <div class="social-links">
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                        <a href="#" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4><i class="fas fa-link"></i> Quick Links</h4>
+                    <ul>
+                        <li><a href="{{ url_for('menu') }}"><i class="fas fa-chevron-right"></i> Our Menu</a></li>
+                        <li><a href="{{ url_for('drinks') }}"><i class="fas fa-chevron-right"></i> Drinks</a></li>
+                        <li><a href="{{ url_for('customize') }}"><i class="fas fa-chevron-right"></i> Build Your Roll</a></li>
+                        <li><a href="{{ url_for('about') }}"><i class="fas fa-chevron-right"></i> Our Story</a></li>
+                        <li><a href="{{ url_for('contact') }}"><i class="fas fa-chevron-right"></i> Get In Touch</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Nutrition Info</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4><i class="fas fa-phone"></i> Contact Info</h4>
+                    <div class="contact-info">
+                        <p><i class="fas fa-phone-alt"></i> <span>8018854135</span></p>
+                        <p><i class="fas fa-envelope"></i> <span>jk8523301@gmail.com</span></p>
+                        <p><i class="fas fa-map-marker-alt"></i> <span>123 Flavor Street, Food City, FC 12345</span></p>
+                        <p><i class="fas fa-globe"></i> <span>www.rollparadise.com</span></p>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4><i class="fas fa-clock"></i> Opening Hours</h4>
+                    <div class="hours-info">
+                        <div class="hours-day">
+                            <span class="day">Monday - Friday</span>
+                            <span class="time">10:00 AM - 10:00 PM</span>
+                        </div>
+                        <div class="hours-day">
+                            <span class="day">Saturday - Sunday</span>
+                            <span class="time">9:00 AM - 11:00 PM</span>
+                        </div>
+                        <div class="special-notice">
+                            <i class="fas fa-fire"></i> Late night delivery until 2 AM!
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <div class="footer-bottom-content">
+                    <p>&copy; 2024 Roll Paradise. All rights reserved. Made with <i class="fas fa-heart pulse"></i> for food lovers!</p>
+                    <div class="footer-links">
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Terms of Service</a>
+                        <a href="#">Cookie Policy</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner">
+            <div class="spinner-roll"></div>
+            <p>Preparing your delicious experience...</p>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Floating Action Button -->
+    <div class="fab-container">
+        <button class="fab-main" id="fab-main">
+            <i class="fas fa-plus"></i>
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="fab-options">
+            <a href="{{ url_for('customize') }}" class="fab-option" data-tooltip="Build Your Roll">
+                <i class="fas fa-palette"></i>
+            </a>
+            <a href="{{ url_for('menu') }}" class="fab-option" data-tooltip="View Menu">
+                <i class="fas fa-utensils"></i>
+            </a>
+            <a href="tel:+15551234567" class="fab-option" data-tooltip="Call Now">
+                <i class="fas fa-phone"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Transparent Sign In/Sign Up Modal (no overlay) -->
+    <div id="authModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:9999; pointer-events:none;">
+      <div id="authModalForm" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:auto;">
+        <div class="modal-themed-bg" style="background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius:20px; box-shadow:0 8px 32px rgba(0,0,0,0.18); padding:48px 48px; min-width:400px; max-width:480px; min-height:420px; max-height:90vh; overflow-y:auto; position:relative;">
+          <div style="text-align:center; margin-bottom:24px;">
+            <h2 style="margin:0 0 8px 0; color:#ff6b35; font-family:'Poppins',sans-serif;">
+              Sign In to <span style="font-family:'Dancing Script',cursive; font-size:1.3em; color:#fff; letter-spacing:1px;">Roll Paradise</span>
+            </h2>
+            <div style="font-size:1.1em; color:#888;">Welcome! Please sign in or create an account.</div>
+          </div>
+          <div style="display:flex; justify-content:center; margin-bottom:24px;">
+            <button id="modalTabSignIn" class="modal-tab-btn active" style="border:none; background:none; font-weight:bold; color:#ff6b35; font-size:1em; margin-right:16px; cursor:pointer;">Sign In</button>
+            <button id="modalTabSignUp" class="modal-tab-btn" style="border:none; background:none; font-weight:bold; color:#888; font-size:1em; cursor:pointer;">Sign Up</button>
+          </div>
+          <form id="modalSignInForm" style="display:block;">
+            <div style="margin-bottom:18px;">
+              <input type="email" id="modalLoginEmail" placeholder="Email address" required style="width:100%; padding:14px 18px; border-radius:8px; border:1.5px solid #eee; font-size:1em; margin-bottom:10px;">
+              <input type="password" id="modalLoginPassword" placeholder="Password" required style="width:100%; padding:14px 18px; border-radius:8px; border:1.5px solid #eee; font-size:1em;">
+            </div>
+            <button type="submit" style="width:100%; padding:14px; background:#ff6b35; color:#fff; border:none; border-radius:8px; font-weight:bold; font-size:1.1em; cursor:pointer;">Sign In</button>
+            <div id="modalSignInMsg" style="margin-top:12px; text-align:center; font-weight:bold;"></div>
+          </form>
+          <form id="modalSignUpForm" style="display:none;">
+            <div style="margin-bottom:18px;">
+              <input type="text" id="modalSignUpName" placeholder="Full Name" required style="width:100%; padding:14px 18px; border-radius:8px; border:1.5px solid #eee; font-size:1em; margin-bottom:10px;">
+              <input type="email" id="modalSignUpEmail" placeholder="Email address" required style="width:100%; padding:14px 18px; border-radius:8px; border:1.5px solid #eee; font-size:1em; margin-bottom:10px;">
+              <input type="tel" id="modalSignUpPhone" placeholder="Phone number" required style="width:100%; padding:14px 18px; border-radius:8px; border:1.5px solid #eee; font-size:1em; margin-bottom:10px;">
+              <input type="password" id="modalSignUpPassword" placeholder="Password" required style="width:100%; padding:14px 18px; border-radius:8px; border:1.5px solid #eee; font-size:1em;">
+            </div>
+            <button type="submit" style="width:100%; padding:14px; background:#ff6b35; color:#fff; border:none; border-radius:8px; font-weight:bold; font-size:1.1em; cursor:pointer;">Sign Up</button>
+            <div id="modalSignUpMsg" style="margin-top:12px; text-align:center; font-weight:bold;"></div>
+          </form>
+          <button onclick="hideModal()" style="margin-top:18px; background:none; border:none; color:#888; font-size:1.2em; cursor:pointer; display:block; width:100%;">Close</button>
+        </div>
+      </div>
+    </div>
+    <script>
+      window.isSignedIn = {{ 'true' if session.get('user_email') else 'false' }};
+    </script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+  window.signedInUser = {
+    name: "{{ session.get('user_name', '') }}",
+    email: "{{ session.get('user_email', '') }}"
+  };
+</script>
+    <script>
+    // Intercept clicks on protected links/buttons if not signed in
+    (function() {
+      if (!window.isSignedIn || window.isSignedIn === 'false') {
+        // Selectors for protected actions (customize, menu, drinks, cart, profile, main CTAs)
+        const protectedSelectors = [
+          'a.nav-link:not([href="{{ url_for('home') }}"]):not(.signin-button)',
+          'a[href*="customize"]',
+          'a[href*="menu"]',
+          'a[href*="drinks"]',
+          'a[href*="cart"]',
+          'a[href*="profile"]',
+          '.btn-primary',
+          '.btn-secondary',
+          '.fab-option',
+          '.fab-main',
+          '.cta-buttons .btn',
+          '.featured-actions .btn',
+          '.hero .btn',
+          '.fab-option',
+        ];
+        const links = document.querySelectorAll(protectedSelectors.join(','));
+        links.forEach(link => {
+          link.addEventListener('click', function(e) {
+            // Allow sign in and home links
+            if (this.classList.contains('signin-button') || this.getAttribute('href') === '{{ url_for('home') }}') return;
+            e.preventDefault();
+            showModal();
+          });
+        });
+      }
+    })();
+    </script>
+    {% block extra_js %}{% endblock %}
+    {% if force_signup_modal %}
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        openSignInModal();
+        switchModalTab('signup');
+      });
+    </script>
+    {% endif %}
+    <script>
+        // Existing functions...
+        function openAuthModal() {
+            // Your existing auth modal code
+            console.log('Opening auth modal...');
+        }
+
+        function logout() {
+            fetch('/api/logout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then data => {
+                if (data.success) {
+                    window.location.href = '/';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+    <script>
+    function showModal() {
+      document.getElementById('authModal').style.display = 'block';
+    }
+    function hideModal() {
+      document.getElementById('authModal').style.display = 'none';
+    }
+    // Tab switching
+    const tabSignIn = document.getElementById('modalTabSignIn');
+    const tabSignUp = document.getElementById('modalTabSignUp');
+    const formSignIn = document.getElementById('modalSignInForm');
+    const formSignUp = document.getElementById('modalSignUpForm');
+    tabSignIn.onclick = function() {
+      tabSignIn.classList.add('active');
+      tabSignUp.classList.remove('active');
+      tabSignIn.style.color = '#ff6b35';
+      tabSignUp.style.color = '#888';
+      formSignIn.style.display = 'block';
+      formSignUp.style.display = 'none';
+    };
+    tabSignUp.onclick = function() {
+      tabSignUp.classList.add('active');
+      tabSignIn.classList.remove('active');
+      tabSignUp.style.color = '#ff6b35';
+      tabSignIn.style.color = '#888';
+      formSignIn.style.display = 'none';
+      formSignUp.style.display = 'block';
+    };
+    // Sign In handler
+    formSignIn.onsubmit = function(e) {
+      e.preventDefault();
+      const email = document.getElementById('modalLoginEmail').value;
+      const password = document.getElementById('modalLoginPassword').value;
+      const msg = document.getElementById('modalSignInMsg');
+      msg.textContent = 'Signing in...';
+      msg.style.color = '#888';
+      fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          msg.textContent = 'Sign in successful! Redirecting...';
+          msg.style.color = '#388e3c';
+          setTimeout(() => { window.location.href = '/'; }, 1200);
+        } else {
+          msg.textContent = data.message || 'Sign in failed.';
+          msg.style.color = '#d32f2f';
+        }
+      })
+      .catch(() => {
+        msg.textContent = 'Error signing in. Please try again.';
+        msg.style.color = '#d32f2f';
+      });
+    };
+    // Sign Up handler
+    formSignUp.onsubmit = function(e) {
+      e.preventDefault();
+      const full_name = document.getElementById('modalSignUpName').value;
+      const email = document.getElementById('modalSignUpEmail').value;
+      const phone = document.getElementById('modalSignUpPhone').value;
+      const password = document.getElementById('modalSignUpPassword').value;
+      const msg = document.getElementById('modalSignUpMsg');
+      msg.textContent = 'Creating account...';
+      msg.style.color = '#888';
+      fetch('/api/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ full_name, email, phone, password })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          msg.textContent = 'Account created! Redirecting...';
+          msg.style.color = '#388e3c';
+          setTimeout(() => { window.location.href = '/'; }, 1200);
+        } else {
+          msg.textContent = data.message || 'Sign up failed.';
+          msg.style.color = '#d32f2f';
+        }
+      })
+      .catch(() => {
+        msg.textContent = 'Error creating account. Please try again.';
+        msg.style.color = '#d32f2f';
+      });
+    };
+    // Make modal close on outside click
+    window.onclick = function(event) {
+      const modal = document.getElementById('authModal');
+      if (event.target === modal) hideModal();
+    };
+    </script>
+</body>
+</html>

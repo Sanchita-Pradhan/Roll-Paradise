@@ -1,0 +1,524 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Drinks Hero Section -->
+<section class="drinks-hero">
+    <div class="hero-background">
+        <div class="hero-overlay"></div>
+    </div>
+    
+    <!-- Floating drink elements -->
+    <div class="floating-drinks">
+        <div class="floating-drink drink-1">🥤</div>
+        <div class="floating-drink drink-2">☕</div>
+        <div class="floating-drink drink-3">🧃</div>
+        <div class="floating-drink drink-4">🥛</div>
+        <div class="floating-drink drink-5">🫖</div>
+        <div class="floating-drink drink-6">🥤</div>
+    </div>
+    
+    <div class="container">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <span class="badge-icon">🌟</span>
+                <span class="badge-text">Premium Beverages</span>
+            </div>
+            
+            <h1 class="hero-title reveal-text">
+                <span class="title-icon">🥤</span>
+                Refreshing Drinks
+                <span class="title-icon">🥤</span>
+            </h1>
+            
+            <p class="hero-subtitle reveal-text" data-delay="200">
+                Quench your thirst with our handcrafted beverages. From fresh juices to premium coffee, 
+                we have the perfect drink to complement your roll experience!
+            </p>
+            
+            <div class="hero-features reveal-text" data-delay="300">
+                <div class="feature-item">
+                    <i class="fas fa-leaf"></i>
+                    <span>100% Natural</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-clock"></i>
+                    <span>Fresh Daily</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-star"></i>
+                    <span>Premium Quality</span>
+                </div>
+            </div>
+            
+            <div class="hero-stats reveal-text" data-delay="400">
+                <div class="stat-item">
+                    <div class="stat-number">{{ drinks|length }}+</div>
+                    <div class="stat-label">Drink Varieties</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label">Fresh Ingredients</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">24/7</div>
+                    <div class="stat-label">Available</div>
+                </div>
+            </div>
+            
+            <div class="hero-cta reveal-text" data-delay="500">
+                <button class="btn btn-primary btn-large" onclick="document.getElementById('drinkSearch').focus()">
+                    <i class="fas fa-search"></i>
+                    Explore Drinks
+                </button>
+                <button class="btn btn-secondary btn-large" onclick="filterByCategory('popular')">
+                    <i class="fas fa-fire"></i>
+                    Popular Drinks
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scroll indicator -->
+    <div class="scroll-indicator">
+        <div class="scroll-text">Scroll to explore</div>
+        <div class="scroll-arrow">
+            <i class="fas fa-chevron-down"></i>
+        </div>
+    </div>
+</section>
+
+<!-- Search and Filter Section -->
+<section class="search-filter-section">
+    <div class="container">
+        <div class="search-filter-container">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="drinkSearch" placeholder="Search for your favorite drink..." value="{{ search_query }}">
+            </div>
+            <div class="filter-buttons">
+                <button class="filter-btn {% if current_category == 'all' %}active{% endif %}" data-category="all">
+                    All Drinks <span class="count-badge">{{ category_counts.all }}</span>
+                </button>
+                <button class="filter-btn {% if current_category == 'hot' %}active{% endif %}" data-category="hot">
+                    <i class="fas fa-fire"></i> Hot Drinks <span class="count-badge">{{ category_counts.hot }}</span>
+                </button>
+                <button class="filter-btn {% if current_category == 'cold' %}active{% endif %}" data-category="cold">
+                    <i class="fas fa-snowflake"></i> Cold Drinks <span class="count-badge">{{ category_counts.cold }}</span>
+                </button>
+                <button class="filter-btn {% if current_category == 'smoothies' %}active{% endif %}" data-category="smoothies">
+                    <i class="fas fa-blender"></i> Smoothies <span class="count-badge">{{ category_counts.smoothies }}</span>
+                </button>
+                <button class="filter-btn {% if current_category == 'coffee' %}active{% endif %}" data-category="coffee">
+                    <i class="fas fa-coffee"></i> Coffee <span class="count-badge">{{ category_counts.coffee }}</span>
+                </button>
+                <button class="filter-btn {% if current_category == 'tea' %}active{% endif %}" data-category="tea">
+                    <i class="fas fa-leaf"></i> Tea <span class="count-badge">{{ category_counts.tea }}</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Category Section Headers -->
+{% if current_category != 'all' %}
+<section class="category-header-section">
+    <div class="container">
+        <div class="category-header">
+            <div class="category-icon-large">
+                {% if current_category == 'hot' %}
+                    <i class="fas fa-fire"></i>
+                {% elif current_category == 'cold' %}
+                    <i class="fas fa-snowflake"></i>
+                {% elif current_category == 'smoothies' %}
+                    <i class="fas fa-blender"></i>
+                {% elif current_category == 'coffee' %}
+                    <i class="fas fa-coffee"></i>
+                {% elif current_category == 'tea' %}
+                    <i class="fas fa-leaf"></i>
+                {% endif %}
+            </div>
+            <div class="category-info">
+                <h2 class="category-title">{{ current_category|title }} Drinks</h2>
+                <p class="category-description">
+                    {% if current_category == 'hot' %}
+                        Warm and comforting beverages perfect for any time of day.
+                    {% elif current_category == 'cold' %}
+                        Refreshing and cool beverages to beat the heat.
+                    {% elif current_category == 'smoothies' %}
+                        Nutritious and delicious blended fruit beverages.
+                    {% elif current_category == 'coffee' %}
+                        Premium coffee selections for coffee lovers.
+                    {% elif current_category == 'tea' %}
+                        Traditional and herbal tea varieties.
+                    {% endif %}
+                </p>
+                <div class="category-count">{{ drinks|length }} items available</div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Drinks Grid Section -->
+<section class="drinks-grid-section">
+    <div class="container">
+        {% if drinks %}
+        <div class="drinks-grid" id="drinksGrid">
+            {% for drink in drinks %}
+            <div class="drink-card card-reveal" data-delay="{{ loop.index * 100 }}" data-category="{{ drink.category }}">
+                <div class="drink-image-container">
+                    <img src="{{ drink.image }}" alt="{{ drink.name }}" class="drink-image">
+                    <div class="drink-overlay">
+                        <div class="overlay-content">
+                            <button class="quick-view-btn" onclick="showDrinkQuickView({{ drink.id }})">
+                                <i class="fas fa-eye"></i>
+                                Quick View
+                            </button>
+                            <button class="add-to-cart-btn" onclick="addToCart({{ drink.id }}, 'drink')">
+                                <i class="fas fa-plus"></i>
+                                Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                    <div class="price-badge">₹{{ '%.2f'|format(drink.price) }}</div>
+                    <div class="drink-badges">
+                        {% if drink.get('popular') %}
+                        <div class="popular-badge">
+                            <i class="fas fa-fire"></i>
+                            Popular
+                        </div>
+                        {% endif %}
+                        {% if drink.get('new') %}
+                        <div class="new-badge">
+                            <i class="fas fa-star"></i>
+                            New
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="drink-content">
+                    <h3 class="drink-title">{{ drink.name }}</h3>
+                    <p class="drink-description">{{ drink.description }}</p>
+                    <div class="drink-details">
+                        <div class="drink-tags">
+                            {% if drink.get('hot') %}
+                            <span class="tag hot"><i class="fas fa-fire"></i> Hot</span>
+                            {% endif %}
+                            {% if drink.get('cold') %}
+                            <span class="tag cold"><i class="fas fa-snowflake"></i> Cold</span>
+                            {% endif %}
+                            {% if drink.get('caffeine') %}
+                            <span class="tag caffeine"><i class="fas fa-bolt"></i> Caffeine</span>
+                            {% endif %}
+                            {% if drink.get('organic') %}
+                            <span class="tag organic"><i class="fas fa-leaf"></i> Organic</span>
+                            {% endif %}
+                        </div>
+                        <div class="drink-size">
+                            <span class="size-label">Size:</span>
+                            <span class="size-value">{{ drink.size }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-drinks-message">
+            <div class="no-drinks-icon">🥤</div>
+            <h3>No drinks found</h3>
+            <p>Try adjusting your search or filter criteria.</p>
+            <button class="btn btn-primary" onclick="resetFilters()">
+                <i class="fas fa-refresh"></i> Show All Drinks
+            </button>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Drink Categories Overview -->
+{% if current_category == 'all' %}
+<section class="drink-categories-overview">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Drink Categories</h2>
+            <p class="section-subtitle">Explore our diverse selection of beverages</p>
+        </div>
+        <div class="categories-grid">
+            <div class="category-card" onclick="filterByCategory('hot')">
+                <div class="category-icon">
+                    <i class="fas fa-fire"></i>
+                </div>
+                <h3>Hot Drinks</h3>
+                <p>Warm and comforting beverages perfect for any time of day.</p>
+                <div class="category-count">{{ category_counts.hot }} items</div>
+                <div class="category-arrow">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </div>
+            <div class="category-card" onclick="filterByCategory('cold')">
+                <div class="category-icon">
+                    <i class="fas fa-snowflake"></i>
+                </div>
+                <h3>Cold Drinks</h3>
+                <p>Refreshing and cool beverages to beat the heat.</p>
+                <div class="category-count">{{ category_counts.cold }} items</div>
+                <div class="category-arrow">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </div>
+            <div class="category-card" onclick="filterByCategory('smoothies')">
+                <div class="category-icon">
+                    <i class="fas fa-blender"></i>
+                </div>
+                <h3>Smoothies</h3>
+                <p>Nutritious and delicious blended fruit beverages.</p>
+                <div class="category-count">{{ category_counts.smoothies }} items</div>
+                <div class="category-arrow">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </div>
+            <div class="category-card" onclick="filterByCategory('coffee')">
+                <div class="category-icon">
+                    <i class="fas fa-coffee"></i>
+                </div>
+                <h3>Coffee</h3>
+                <p>Premium coffee selections for coffee lovers.</p>
+                <div class="category-count">{{ category_counts.coffee }} items</div>
+                <div class="category-arrow">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </div>
+            <div class="category-card" onclick="filterByCategory('tea')">
+                <div class="category-icon">
+                    <i class="fas fa-leaf"></i>
+                </div>
+                <h3>Tea</h3>
+                <p>Traditional and herbal tea varieties.</p>
+                <div class="category-count">{{ category_counts.tea }} items</div>
+                <div class="category-arrow">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Quick View Modal for Drinks -->
+<div id="drinkQuickViewModal" class="quick-view-modal">
+    <div class="quick-view-overlay" onclick="closeDrinkQuickView()"></div>
+    <div class="quick-view-content">
+        <div class="quick-view-header">
+            <h2 id="drinkQuickViewTitle">Drink Details</h2>
+            <button class="quick-view-close" onclick="closeDrinkQuickView()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="quick-view-body">
+            <div class="quick-view-image-container">
+                <img id="drinkQuickViewImage" src="" alt="" class="quick-view-image">
+                <div class="quick-view-badges">
+                    <div id="drinkQuickViewPrice" class="quick-view-price"></div>
+                    <div id="drinkQuickViewPopular" class="quick-view-popular" style="display: none;">
+                        <i class="fas fa-fire"></i> Popular
+                    </div>
+                </div>
+            </div>
+            
+            <div class="quick-view-details">
+                <div class="quick-view-description" id="drinkQuickViewDescription"></div>
+                
+                <div class="quick-view-tags" id="drinkQuickViewTags"></div>
+                
+                <div class="quick-view-size">
+                    <h4><i class="fas fa-ruler"></i> Size:</h4>
+                    <span id="drinkQuickViewSize"></span>
+                </div>
+                
+                <div class="quick-view-actions">
+                    <button class="btn btn-primary" id="drinkQuickViewAddToCart">
+                        <i class="fas fa-plus"></i> Add to Cart
+                    </button>
+                    <button class="btn btn-secondary" onclick="closeDrinkQuickView()">
+                        <i class="fas fa-times"></i> Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Drink data for quick view
+const drinksData = {{ drinks | tojson | safe }};
+
+// Search functionality
+document.getElementById('drinkSearch').addEventListener('input', function() {
+    const searchTerm = this.value.toLowerCase();
+    const drinkCards = document.querySelectorAll('.drink-card');
+    
+    drinkCards.forEach(card => {
+        const drinkName = card.querySelector('.drink-title').textContent.toLowerCase();
+        const drinkDesc = card.querySelector('.drink-description').textContent.toLowerCase();
+        
+        if (drinkName.includes(searchTerm) || drinkDesc.includes(searchTerm)) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+});
+
+// Filter functionality
+document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const category = this.dataset.category;
+        window.location.href = `/drinks?category=${category}`;
+    });
+});
+
+// Filter by category from category cards
+function filterByCategory(category) {
+    window.location.href = `/drinks?category=${category}`;
+}
+
+// Reset filters
+function resetFilters() {
+    window.location.href = '/drinks';
+}
+
+// Quick view functionality
+function showDrinkQuickView(drinkId) {
+    const drink = drinksData.find(d => d.id === drinkId);
+    if (!drink) return;
+    
+    document.getElementById('drinkQuickViewTitle').textContent = drink.name;
+    document.getElementById('drinkQuickViewImage').src = drink.image;
+    document.getElementById('drinkQuickViewImage').alt = drink.name;
+    document.getElementById('drinkQuickViewDescription').textContent = drink.description;
+    document.getElementById('drinkQuickViewPrice').textContent = `₹${drink.price.toFixed(2)}`;
+    document.getElementById('drinkQuickViewSize').textContent = drink.size;
+    
+    // Show/hide popular badge
+    const popularElement = document.getElementById('drinkQuickViewPopular');
+    if (drink.popular) {
+        popularElement.style.display = 'block';
+    } else {
+        popularElement.style.display = 'none';
+    }
+    
+    // Set up add to cart button
+    const addToCartBtn = document.getElementById('drinkQuickViewAddToCart');
+    addToCartBtn.onclick = () => {
+        addToCart(drink.id, 'drink');
+        closeDrinkQuickView();
+    };
+    
+    // Show modal
+    document.getElementById('drinkQuickViewModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeDrinkQuickView() {
+    document.getElementById('drinkQuickViewModal').classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+// Add to cart functionality
+function addToCart(itemId, itemType) {
+    fetch("/api/add_to_cart", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            id: itemId,
+            type: itemType,
+            quantity: 1,
+        }),
+    })
+    .then((response) => response.json())
+    .then((data) => {
+        if (data.success) {
+            showToast(data.message, "success");
+            updateCartDisplay(data.cart_count, data.cart_total);
+        } else {
+            showToast(data.message, "error");
+        }
+    })
+    .catch((error) => {
+        showToast("Error adding item to cart", "error");
+    });
+}
+
+// Toast notification function
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+        <span>${message}</span>
+    `;
+    
+    const container = document.getElementById('toast-container');
+    if (container) {
+        container.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.classList.add('show');
+        }, 100);
+        
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                if (container.contains(toast)) {
+                    container.removeChild(toast);
+                }
+            }, 300);
+        }, 3000);
+    }
+}
+
+// Update cart display function
+function updateCartDisplay(cartCount, cartTotal) {
+    const cartCountElement = document.getElementById('cart-count');
+    if (cartCountElement) {
+        cartCountElement.textContent = cartCount;
+    }
+    
+    // You can also update cart total if needed
+    const cartTotalElement = document.getElementById('cart-total');
+    if (cartTotalElement) {
+        cartTotalElement.textContent = `₹${cartTotal.toFixed(2)}`;
+    }
+}
+
+// Initialize animations
+document.addEventListener('DOMContentLoaded', function() {
+    // Add animation classes
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const delay = entry.target.dataset.delay || 0;
+                setTimeout(() => {
+                    entry.target.classList.add('animate');
+                }, delay);
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.reveal-text, .card-reveal').forEach(el => {
+        observer.observe(el);
+    });
+});
+</script>
+{% endblock %} 

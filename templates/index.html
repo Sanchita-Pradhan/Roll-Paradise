@@ -1,0 +1,852 @@
+{% extends "base.html" %} {% block title %}Roll Paradise - Home of Amazing Food
+Rolls{% endblock %} {% block content %}
+<!-- Hero Section -->
+<section id="home" class="hero">
+  <div class="hero-background">
+    <div class="hero-overlay"></div>
+    <div class="floating-food-particles"></div>
+  </div>
+
+  <div class="hero-content">
+    <div class="hero-text">
+      <h1 class="hero-title">
+        <span class="word-animation" data-delay="0">Welcome</span>
+        <span class="word-animation" data-delay="200">to</span>
+        <span class="word-animation hero-brand" data-delay="400"
+          >Roll Paradise</span
+        >
+      </h1>
+      <p class="hero-subtitle animate-text" data-delay="800">
+        🌟 Where every bite is a journey to flavor heaven! Experience the
+        perfect fusion of fresh ingredients, authentic spices, and culinary
+        artistry wrapped in pure deliciousness.
+      </p>
+      <div class="hero-stats animate-stats" data-delay="1200"></div>
+      <div class="hero-buttons animate-buttons" data-delay="1600">
+        <button class="btn btn-primary pulse-btn" onclick="scrollToFeatured()">
+          <i class="fas fa-utensils"></i> Order Now
+          <span class="btn-glow"></span>
+        </button>
+        <a href="{{ url_for('menu') }}" class="btn btn-secondary">
+          <i class="fas fa-list"></i> View Full Menu
+        </a>
+        <a href="{{ url_for('customize') }}" class="btn btn-special">
+          <i class="fas fa-palette"></i> Build Your Roll
+        </a>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="roll-showcase">
+        <div class="main-roll">
+          <img
+            src="/static/images/R1.jpg"
+            alt="Delicious Roll"
+            class="roll-image main-roll-img"
+          />
+          <div class="roll-glow"></div>
+          <div class="steam-effect">
+            <div class="steam steam-1"></div>
+            <div class="steam steam-2"></div>
+            <div class="steam steam-3"></div>
+            <div class="steam steam-4"></div>
+            <div class="steam steam-5"></div>
+          </div>
+        </div>
+
+        <div class="satellite-rolls">
+          <div class="satellite-roll roll-1">
+            <img
+              src="/static/images/R2.jpg"
+              alt="Spicy Roll"
+              class="roll-image"
+            />
+            <div class="roll-label">Spicy</div>
+          </div>
+          <div class="satellite-roll roll-2">
+            <img src="/static/images/R3.jpg" alt="Veggie Roll" class="roll-image" />
+            <div class="roll-label">Veggie</div>
+          </div>
+          <div class="satellite-roll roll-3">
+            <img
+              src="/static/images/R4.jpg"
+              alt="BBQ Roll"
+              class="roll-image"
+            />
+            <div class="roll-label">BBQ</div>
+          </div>
+          <div class="satellite-roll roll-4">
+            <img
+              src="/static/images/R5.jpg"
+              alt="Fish Roll"
+              class="roll-image"
+            />
+            <div class="roll-label">Fish</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="scroll-indicator">
+    <div class="scroll-arrow">
+      <i class="fas fa-chevron-down"></i>
+    </div>
+    <span>Scroll to explore</span>
+  </div>
+</section>
+
+<!-- Featured Rolls Section -->
+<section class="featured-rolls" id="featured-rolls">
+  <div class="section-header">
+    <h2 class="section-title reveal-text">
+      <span class="title-icon">🍽️</span>
+      Featured Masterpieces
+      <span class="title-icon">🍽️</span>
+    </h2>
+    <p class="section-subtitle reveal-text" data-delay="200">
+      Handcrafted with love, served with passion. Each roll is a culinary
+      adventure waiting to be discovered!
+    </p>
+  </div>
+
+  <div class="container">
+    <div class="featured-grid">
+      {% for roll in featured_rolls %}
+      <div
+        class="featured-card card-reveal"
+        data-delay="{{ loop.index * 200 }}"
+      >
+        <div class="card-image-container">
+          <img
+            src="{{ roll.image }}"
+            alt="{{ roll.name }}"
+            class="card-image"
+          />
+          <div class="card-overlay">
+            <div class="overlay-content">
+              <button
+                class="quick-view-btn"
+                onclick="showQuickView({{ roll.id }})"
+              >
+                <i class="fas fa-eye"></i>
+                Quick View
+              </button>
+              <button
+                class="add-to-cart-btn"
+                onclick="addToCart({{ roll.id }}, 'roll')"
+              >
+                <i class="fas fa-plus"></i>
+                Add to Cart
+              </button>
+            </div>
+          </div>
+          <div class="price-badge">₹{{ "%.2f"|format(roll.price) }}</div>
+          {% if roll.get('popular') %}
+          <div class="popular-badge">
+            <i class="fas fa-fire"></i>
+            Popular
+          </div>
+          {% endif %}
+          <div class="prep-time">
+            <i class="fas fa-clock"></i>
+            {{ roll.prep_time }}
+          </div>
+        </div>
+
+        <div class="card-content">
+          <h3 class="card-title">{{ roll.name }}</h3>
+          <p class="card-description">{{ roll.description }}</p>
+
+          <div class="card-details">
+            <div class="rating">
+              <div class="stars">
+                {% for i in range(5) %} {% if i < roll.rating %}
+                <i class="fas fa-star"></i>
+                {% else %}
+                <i class="far fa-star"></i>
+                {% endif %} {% endfor %}
+              </div>
+              <span class="rating-value">{{ roll.rating }}</span>
+            </div>
+
+            <div class="card-tags">
+              <span class="tag calories">{{ roll.calories }} cal</span>
+              <span class="tag spicy spicy-{{ roll.spicy_level }}">
+                {% if roll.spicy_level == 0 %} Mild {% elif roll.spicy_level ==
+                1 %}
+                <i class="fas fa-pepper-hot"></i> Mild {% elif roll.spicy_level
+                == 2 %} <i class="fas fa-pepper-hot"></i
+                ><i class="fas fa-pepper-hot"></i> Medium {% else %}
+                <i class="fas fa-pepper-hot"></i
+                ><i class="fas fa-pepper-hot"></i
+                ><i class="fas fa-pepper-hot"></i> Hot {% endif %}
+              </span>
+            </div>
+          </div>
+
+          <div class="card-ingredients">
+            <h5><i class="fas fa-list"></i> Ingredients:</h5>
+            <div class="ingredients-list">
+              {% for ingredient in roll.ingredients %}
+              <span class="ingredient-tag">{{ ingredient }}</span>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="featured-actions">
+      <a href="{{ url_for('menu') }}" class="btn btn-outline-primary">
+        <i class="fas fa-utensils"></i>
+        Explore Full Menu
+        <span class="btn-icon-end"><i class="fas fa-arrow-right"></i></span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Why Choose Us Section -->
+<section class="why-choose-us">
+  <div class="section-background">
+    <div class="bg-pattern"></div>
+  </div>
+
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title reveal-text">
+        <span class="title-icon">🏆</span>
+        Why Roll Paradise?
+        <span class="title-icon">🏆</span>
+      </h2>
+      <p class="section-subtitle reveal-text" data-delay="200">
+        We don't just make rolls - we craft experiences that delight your senses
+        and satisfy your soul!
+      </p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card feature-reveal" data-delay="100">
+        <div class="feature-icon">
+          <i class="fas fa-leaf"></i>
+        </div>
+        <h3>Farm Fresh Ingredients</h3>
+        <p>
+          Sourced daily from local farms, ensuring maximum freshness and flavor
+          in every bite
+        </p>
+        <div class="feature-stats">
+          <div class="stat-number">200+</div>
+          <div class="stat-label">Fresh ingredients daily</div>
+        </div>
+        <div class="feature-animation">
+          <div class="floating-icons">
+            <i class="fas fa-carrot"></i>
+            <i class="fas fa-pepper-hot"></i>
+            <i class="fas fa-cheese"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="feature-card feature-reveal" data-delay="300">
+        <div class="feature-icon">
+          <i class="fas fa-bolt"></i>
+        </div>
+        <h3>Lightning Fast Service</h3>
+        <p>
+          From order to your table in minutes, with hot and fresh delivery
+          guaranteed
+        </p>
+        <div class="feature-stats">
+          <div class="stat-number">8-15</div>
+          <div class="stat-label">Minutes average</div>
+        </div>
+        <div class="feature-animation">
+          <div class="speed-lines"></div>
+        </div>
+      </div>
+
+      <div class="feature-card feature-reveal" data-delay="500">
+        <div class="feature-icon">
+          <i class="fas fa-palette"></i>
+        </div>
+        <h3>Endless Customization</h3>
+        <p>
+          Build your perfect roll with our interactive customizer and unlimited
+          combinations
+        </p>
+        <div class="feature-stats">
+          <div class="stat-number">1000+</div>
+          <div class="stat-label">Possible combinations</div>
+        </div>
+        <div class="feature-animation">
+          <div class="color-splash"></div>
+        </div>
+      </div>
+
+      <div class="feature-card feature-reveal" data-delay="700">
+        <div class="feature-icon">
+          <i class="fas fa-award"></i>
+        </div>
+        <h3>Award Winning Taste</h3>
+        <p>
+          Recognized by food critics and loved by customers for exceptional
+          flavors
+        </p>
+        <div class="feature-stats">
+          <div class="stat-number">15+</div>
+          <div class="stat-label">Food awards</div>
+        </div>
+        <div class="feature-animation">
+          <div class="award-glow"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Customer Reviews Section -->
+<section class="customer-reviews">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title reveal-text">
+        <span class="title-icon">💬</span>
+        What Our Customers Say
+        <span class="title-icon">💬</span>
+      </h2>
+      <p class="section-subtitle reveal-text" data-delay="200">
+        Discover why thousands of customers love Roll Paradise! Here's what they're saying about their experience.
+      </p>
+    </div>
+
+    <div class="reviews-row" id="reviewsRow">
+      <!-- Reviews will be inserted here by JS -->
+    </div>
+
+    <div class="review-form-centerpiece">
+      <div class="ultra-share-card wow-form-card">
+        <div class="ultra-share-title-group" style="margin-bottom: 2rem;">
+          <h3 class="add-review-title">Share Your Experience</h3>
+          <p class="add-review-subtitle">We love hearing from you! Your review helps us and others.</p>
+        </div>
+        <div class="ultra-user-info-row" style="margin-bottom: 2.2rem;">
+          <div class="ultra-user-info-block">
+            <span class="ultra-user-label">Signed in as</span>
+            <span class="ultra-user-name" id="signedInUserName">User Name</span>
+            <span class="ultra-user-email" id="signedInUserEmail">user@email.com</span>
+          </div>
+        </div>
+        <form id="addReviewForm" class="add-review-form ultra-modern-form">
+          <div class="form-group" style="margin-bottom: 2rem;">
+            <label for="reviewRating" class="form-label-rating">Your Rating *</label>
+            <div class="star-rating-container ultra-star-rating-container">
+              <div class="star-rating ultra-star-rating">
+                <input type="radio" id="star5" name="rating" value="5" checked>
+                <label for="star5" class="star">★</label>
+                <input type="radio" id="star4" name="rating" value="4">
+                <label for="star4" class="star">★</label>
+                <input type="radio" id="star3" name="rating" value="3">
+                <label for="star3" class="star">★</label>
+                <input type="radio" id="star2" name="rating" value="2">
+                <label for="star2" class="star">★</label>
+                <input type="radio" id="star1" name="rating" value="1">
+                <label for="star1" class="star">★</label>
+              </div>
+              <span class="rating-text">5 stars</span>
+            </div>
+          </div>
+          <div class="form-group floating-label-group" style="margin-bottom: 2.2rem;">
+            <textarea id="reviewText" name="reviewText" class="form-textarea" rows="4" placeholder=" " required></textarea>
+            <label for="reviewText">Your Review *</label>
+          </div>
+          <button type="submit" class="btn ultra-modern-submit-btn wow-submit-btn"><i class="fas fa-paper-plane"></i> Submit Review</button>
+        </form>
+        <div id="confetti-container"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Call to Action Section -->
+<section class="cta-section">
+  <div class="cta-background">
+    <div class="cta-overlay"></div>
+  </div>
+
+  <div class="container">
+    <div class="cta-content">
+      <h2 class="cta-title reveal-text">Ready for a Flavor Adventure?</h2>
+      <p class="cta-subtitle reveal-text" data-delay="200">
+        Join thousands of satisfied customers and discover why Roll Paradise is
+        the talk of the town!
+      </p>
+      <div class="cta-buttons reveal-text" data-delay="400">
+        <a href="{{ url_for('customize') }}" class="btn btn-primary btn-large">
+          <i class="fas fa-palette"></i>
+          Build Your Dream Roll
+          <span class="btn-glow"></span>
+        </a>
+        <a href="{{ url_for('menu') }}" class="btn btn-outline-light btn-large">
+          <i class="fas fa-utensils"></i>
+          Browse Menu
+        </a>
+      </div>
+
+      <div class="cta-features">
+        <div class="cta-feature">
+          <i class="fas fa-shipping-fast"></i>
+          <span>Free Delivery Over ₹2000</span>
+        </div>
+        <div class="cta-feature">
+          <i class="fas fa-clock"></i>
+          <span>Ready in 8-15 Minutes</span>
+        </div>
+        <div class="cta-feature">
+          <i class="fas fa-heart"></i>
+          <span>Made with Love</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Quick View Modal -->
+<div id="quickViewModal" class="quick-view-modal">
+  <div class="quick-view-overlay" onclick="closeQuickView()"></div>
+  <div class="quick-view-content">
+    <div class="quick-view-header">
+      <h2 id="quickViewTitle">Roll Details</h2>
+      <button class="quick-view-close" onclick="closeQuickView()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="quick-view-body">
+      <div class="quick-view-image-container">
+        <img id="quickViewImage" src="" alt="" class="quick-view-image">
+        <div class="quick-view-badges">
+          <div id="quickViewPrice" class="quick-view-price"></div>
+          <div id="quickViewPopular" class="quick-view-popular" style="display: none;">
+            <i class="fas fa-fire"></i> Popular
+          </div>
+        </div>
+      </div>
+      
+      <div class="quick-view-details">
+        <div class="quick-view-description" id="quickViewDescription"></div>
+        
+        <div class="quick-view-stats">
+          <div class="quick-view-rating">
+            <div class="stars" id="quickViewStars"></div>
+            <span id="quickViewRatingValue"></span>
+          </div>
+          
+          <div class="quick-view-tags">
+            <span class="tag calories" id="quickViewCalories"></span>
+            <span class="tag spicy" id="quickViewSpicy"></span>
+            <span class="tag prep-time" id="quickViewPrepTime"></span>
+          </div>
+        </div>
+        
+        <div class="quick-view-ingredients">
+          <h4><i class="fas fa-list"></i> Ingredients:</h4>
+          <div class="ingredients-grid" id="quickViewIngredients"></div>
+        </div>
+        
+        <div class="quick-view-actions">
+          <button class="btn btn-primary" id="quickViewAddToCart">
+            <i class="fas fa-plus"></i> Add to Cart
+          </button>
+          <button class="btn btn-secondary" onclick="closeQuickView()">
+            <i class="fas fa-times"></i> Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %} {% block extra_js %}
+<script>
+  // Roll data for quick view
+  const featuredRollsData = {{ featured_rolls | tojson | safe }};
+  
+  // Initialize homepage animations
+  document.addEventListener("DOMContentLoaded", function () {
+    initHeroAnimations();
+    initScrollAnimations();
+    initParallaxEffects();
+    createFloatingParticles();
+    initReviewsCarousel();
+  });
+
+  document.addEventListener('DOMContentLoaded', function() {
+    // ...other inits...
+    loadReviews();
+  });
+
+  function initHeroAnimations() {
+    // Animate hero text elements
+    const wordAnimations = document.querySelectorAll(".word-animation");
+    wordAnimations.forEach((word, index) => {
+      const delay = word.dataset.delay || 0;
+      setTimeout(() => {
+        word.classList.add("animate");
+      }, delay);
+    });
+
+    // Animate other hero elements
+    const animateElements = document.querySelectorAll(".hero [data-delay]");
+    animateElements.forEach((element) => {
+      const delay = element.dataset.delay || 0;
+      setTimeout(() => {
+        element.classList.add("animate");
+      }, delay);
+    });
+
+    // Animate satellite rolls
+    setTimeout(() => {
+      document.querySelectorAll(".satellite-roll").forEach((roll, index) => {
+        setTimeout(() => {
+          roll.classList.add("animate");
+        }, index * 200);
+      });
+    }, 2000);
+  }
+
+  function initScrollAnimations() {
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: "0px 0px -50px 0px",
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const delay = entry.target.dataset.delay || 0;
+          setTimeout(() => {
+            entry.target.classList.add("animate");
+          }, delay);
+        }
+      });
+    }, observerOptions);
+
+    // Observe elements for animation
+    document
+      .querySelectorAll(".reveal-text, .card-reveal, .feature-reveal")
+      .forEach((el) => {
+        observer.observe(el);
+      });
+  }
+
+  function initParallaxEffects() {
+    window.addEventListener("scroll", () => {
+      const scrolled = window.pageYOffset;
+      const parallaxElements = document.querySelectorAll(".satellite-roll");
+
+      parallaxElements.forEach((element, index) => {
+        const speed = 0.5 + index * 0.1;
+        const yPos = -(scrolled * speed);
+        element.style.transform = `translateY(${yPos}px) rotate(${
+          scrolled * 0.02 + index * 90
+        }deg)`;
+      });
+    });
+  }
+
+  function createFloatingParticles() {
+    const particles = [
+      "🥬",
+      "🍅",
+      "🧄",
+      "🌶️",
+      "🧀",
+      "🥒",
+      "🥕",
+      "🫒",
+      "🌽",
+      "🥑",
+      "🥖",
+      "🍖",
+    ];
+    const particleContainer = document.querySelector(
+      ".floating-food-particles"
+    );
+
+    setInterval(() => {
+      if (Math.random() > 0.7) {
+        const particle = document.createElement("div");
+        const emoji = particles[Math.floor(Math.random() * particles.length)];
+
+        particle.className = "food-particle";
+        particle.textContent = emoji;
+        particle.style.cssText = `
+                position: absolute;
+                font-size: ${Math.random() * 20 + 15}px;
+                left: ${Math.random() * 100}%;
+                top: 100%;
+                pointer-events: none;
+                z-index: 1;
+                animation: floatUp ${Math.random() * 3 + 4}s linear forwards;
+                opacity: ${Math.random() * 0.5 + 0.3};
+            `;
+
+        particleContainer.appendChild(particle);
+
+        setTimeout(() => {
+          if (particleContainer.contains(particle)) {
+            particleContainer.removeChild(particle);
+          }
+        }, 7000);
+      }
+    }, 1000);
+  }
+
+  function initReviewsCarousel() {
+    const track = document.querySelector(".review-track");
+    if (!track) return;
+
+    let currentPosition = 0;
+    const cardWidth = 350; // width + margin
+    const totalCards = track.children.length;
+
+    setInterval(() => {
+      currentPosition -= cardWidth;
+      if (Math.abs(currentPosition) >= cardWidth * totalCards) {
+        currentPosition = 0;
+      }
+      track.style.transform = `translateX(${currentPosition}px)`;
+    }, 4000);
+  }
+
+  function scrollToFeatured() {
+    document.getElementById("featured-rolls").scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }
+
+  function showQuickView(rollId) {
+    // Find the roll data
+    const roll = featuredRollsData.find(r => r.id === rollId);
+    if (!roll) {
+      showToast("Roll not found!", "error");
+      return;
+    }
+    
+    // Populate modal with roll data
+    document.getElementById('quickViewTitle').textContent = roll.name;
+    document.getElementById('quickViewImage').src = roll.image;
+    document.getElementById('quickViewImage').alt = roll.name;
+    document.getElementById('quickViewDescription').textContent = roll.description;
+    document.getElementById('quickViewPrice').textContent = `₹${roll.price.toFixed(2)}`;
+    document.getElementById('quickViewRatingValue').textContent = roll.rating;
+    document.getElementById('quickViewCalories').textContent = `${roll.calories} cal`;
+    document.getElementById('quickViewPrepTime').textContent = roll.prep_time;
+    
+    // Set spicy level
+    const spicyElement = document.getElementById('quickViewSpicy');
+    if (roll.spicy_level === 0) {
+      spicyElement.textContent = 'Mild';
+      spicyElement.className = 'tag spicy spicy-0';
+    } else if (roll.spicy_level === 1) {
+      spicyElement.innerHTML = '<i class="fas fa-pepper-hot"></i> Mild';
+      spicyElement.className = 'tag spicy spicy-1';
+    } else if (roll.spicy_level === 2) {
+      spicyElement.innerHTML = '<i class="fas fa-pepper-hot"></i><i class="fas fa-pepper-hot"></i> Medium';
+      spicyElement.className = 'tag spicy spicy-2';
+    } else {
+      spicyElement.innerHTML = '<i class="fas fa-pepper-hot"></i><i class="fas fa-pepper-hot"></i><i class="fas fa-pepper-hot"></i> Hot';
+      spicyElement.className = 'tag spicy spicy-3';
+    }
+    
+    // Set stars
+    const starsElement = document.getElementById('quickViewStars');
+    starsElement.innerHTML = '';
+    for (let i = 0; i < 5; i++) {
+      const star = document.createElement('i');
+      star.className = i < roll.rating ? 'fas fa-star' : 'far fa-star';
+      starsElement.appendChild(star);
+    }
+    
+    // Set ingredients
+    const ingredientsElement = document.getElementById('quickViewIngredients');
+    ingredientsElement.innerHTML = '';
+    roll.ingredients.forEach(ingredient => {
+      const tag = document.createElement('span');
+      tag.className = 'ingredient-tag';
+      tag.textContent = ingredient;
+      ingredientsElement.appendChild(tag);
+    });
+    
+    // Show/hide popular badge
+    const popularElement = document.getElementById('quickViewPopular');
+    if (roll.popular) {
+      popularElement.style.display = 'block';
+    } else {
+      popularElement.style.display = 'none';
+    }
+    
+    // Set up add to cart button
+    const addToCartBtn = document.getElementById('quickViewAddToCart');
+    addToCartBtn.onclick = () => {
+      addToCart(roll.id, 'roll');
+      closeQuickView();
+    };
+    
+    // Show modal
+    document.getElementById('quickViewModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  
+  function closeQuickView() {
+    document.getElementById('quickViewModal').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  // Add some extra magic
+  function addToCart(itemId, itemType) {
+    // Call the main addToCart function
+    fetch("/api/add_to_cart", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        id: itemId,
+        type: itemType,
+        quantity: 1,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          showToast(data.message, "success");
+          updateCartDisplay(data.cart_count, data.cart_total);
+
+          // Add some visual feedback
+          createSuccessExplosion();
+        } else {
+          showToast(data.message, "error");
+        }
+      })
+      .catch((error) => {
+        showToast("Error adding item to cart", "error");
+      });
+  }
+
+  function createSuccessExplosion() {
+    const explosion = document.createElement("div");
+    explosion.className = "success-explosion";
+    explosion.innerHTML = "🎉✨🎊⭐🎈";
+    document.body.appendChild(explosion);
+
+    setTimeout(() => {
+      if (document.body.contains(explosion)) {
+        document.body.removeChild(explosion);
+      }
+    }, 2000);
+  }
+
+  // Toast notification function
+  function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+        <span>${message}</span>
+    `;
+    
+    const container = document.getElementById('toast-container');
+    if (container) {
+      container.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.classList.add('show');
+      }, 100);
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+          if (container.contains(toast)) {
+            container.removeChild(toast);
+          }
+        }, 300);
+      }, 3000);
+    }
+  }
+
+  // Update cart display function
+  function updateCartDisplay(cartCount, cartTotal) {
+    const cartCountElement = document.getElementById('cart-count');
+    if (cartCountElement) {
+      cartCountElement.textContent = cartCount;
+    }
+    
+    // You can also update cart total if needed
+    const cartTotalElement = document.getElementById('cart-total');
+    if (cartTotalElement) {
+      cartTotalElement.textContent = `₹${cartTotal.toFixed(2)}`;
+    }
+  }
+
+  document.getElementById('reviewForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const form = e.target;
+  const data = {
+    rating: form.rating.value,
+    title: form.title.value,
+    text: form.text.value,
+    customerTitle: form.customerTitle.value,
+    // Add user info if needed
+  };
+  fetch('/api/submit-review', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  })
+  .then(res => {
+    if (!res.ok) throw new Error('Server error');
+    return res.json();
+  })
+  .then(result => {
+    if (result.success) {
+      loadReviews();
+      form.reset();
+    } else {
+      alert(result.message || 'Failed to submit review.');
+    }
+  })
+  .catch(err => {
+    alert('Server error: Could not submit review.');
+  });
+});
+
+function loadReviews() {
+  fetch('/api/get-reviews')
+    .then(res => res.json())
+    .then(data => {
+      const track = document.querySelector('.review-track');
+      if (!track) return;
+      track.innerHTML = '';
+      if (data.success && data.reviews && data.reviews.length) {
+        data.reviews.forEach(review => {
+          track.innerHTML += `
+            <div class="review-item">
+              <div class="review-rating">${'★'.repeat(review.rating)}</div>
+              <div class="review-title">${review.title || ''}</div>
+              <div class="review-text">${review.text}</div>
+              <div class="review-meta">${review.customer_title || ''}</div>
+            </div>
+          `;
+        });
+      } else {
+        track.innerHTML = '<p>No reviews yet.</p>';
+      }
+    });
+}
+</script>
+{% endblock %}
+

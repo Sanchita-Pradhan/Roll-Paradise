@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roll Paradise - Authentication</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container" id="authContainer">
+        <div class="decorative-elements">
+            <div class="food-icon">🥙</div>
+            <div class="food-icon">🌮</div>
+            <div class="food-icon">🫓</div>
+            <div class="food-icon">🥖</div>
+        </div>
+        <div class="form-container">
+            <!-- Sign Up Form -->
+            <div class="form signup-form">
+                <div class="logo">
+                    <h1>Roll Paradise</h1>
+                    <p class="tagline">Delicious Rolls, Fresh Flavors</p>
+                </div>
+                <form id="signupForm" autocomplete="off">
+                    <div class="form-group">
+                        <input type="text" id="username" name="full_name" required minlength="2" autocomplete="off">
+                        <label for="username">Full Name</label>
+                        <div class="validation-message" id="nameValidation"></div>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" id="email" name="email" required autocomplete="off">
+                        <label for="email">Email Address</label>
+                        <div class="validation-message" id="emailValidation"></div>
+                    </div>
+                    <div class="form-group">
+                        <input type="tel" id="phone" name="phone" required pattern="[0-9]{10}" autocomplete="off">
+                        <label for="phone">Phone Number</label>
+                        <div class="validation-message" id="phoneValidation"></div>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="password" name="password" required minlength="6" autocomplete="off">
+                        <label for="password">Password</label>
+                        <button type="button" class="toggle-password" onclick="togglePassword('password', this)" tabindex="-1" aria-label="Show/Hide password"><i class="fas fa-eye"></i></button>
+                        <div class="validation-message" id="passwordValidation"></div>
+                    </div>
+                    <button type="submit" class="submit-btn">Create Account</button>
+                </form>
+                <div class="toggle-form">
+                    Already have an account? 
+                    <span class="toggle-link" onclick="toggleForm()">Sign In</span>
+                </div>
+            </div>
+            <!-- Login Form -->
+            <div class="form login-form">
+                <div class="logo">
+                    <h1>Roll Paradise</h1>
+                    <p class="tagline">Welcome Back!</p>
+                </div>
+                <form id="loginForm" autocomplete="off">
+                    <div class="form-group">
+                        <input type="email" id="loginEmail" name="email" required autocomplete="off">
+                        <label for="loginEmail">Email Address</label>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="loginPassword" name="password" required autocomplete="off">
+                        <label for="loginPassword">Password</label>
+                        <button type="button" class="toggle-password" onclick="togglePassword('loginPassword', this)" tabindex="-1" aria-label="Show/Hide password"><i class="fas fa-eye"></i></button>
+                    </div>
+                    <button type="submit" class="submit-btn">Sign In</button>
+                </form>
+                <div class="toggle-form">
+                    Don't have an account? 
+                    <span class="toggle-link" onclick="toggleForm()">Sign Up</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        function toggleForm() {
+            const container = document.getElementById('authContainer');
+            container.classList.toggle('login-active');
+        }
+        // Show message
+        function showMessage(msg, type, form) {
+            let msgDiv = form.querySelector('.form-message');
+            if (!msgDiv) {
+                msgDiv = document.createElement('div');
+                msgDiv.className = 'form-message';
+                msgDiv.style.marginBottom = '15px';
+                msgDiv.style.textAlign = 'center';
+                msgDiv.style.fontWeight = 'bold';
+                msgDiv.style.color = (type === 'success') ? '#388e3c' : '#d32f2f';
+                form.insertBefore(msgDiv, form.firstChild);
+            }
+            msgDiv.textContent = msg;
+            msgDiv.style.color = (type === 'success') ? '#388e3c' : '#d32f2f';
+        }
+
+        // Real-time validation for signup fields
+        document.getElementById('username').addEventListener('input', function() {
+            const val = this.value.trim();
+            const msg = document.getElementById('nameValidation');
+            if (val.length < 2) {
+                msg.textContent = "Please enter a valid full name (at least 2 characters).";
+                msg.style.color = "#d32f2f";
+            } else {
+                msg.textContent = "";
+            }
+        });
+
+        document.getElementById('email').addEventListener('input', function() {
+            const val = this.value.trim();
+            const msg = document.getElementById('emailValidation');
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+                msg.textContent = "Please enter a valid email address.";
+                msg.style.color = "#d32f2f";
+                return;
+            }
+            // AJAX check for duplicate email
+            fetch('/api/check-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: val })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.exists) {
+                    msg.textContent = "This email is already registered. Please use a different email or try logging in.";
+                    msg.style.color = "#d32f2f";
+                } else {
+                    msg.textContent = "Email is available!";
+                    msg.style.color = "#388e3c";
+                }
+            });
+        });
+
+        document.getElementById('phone').addEventListener('input', function() {
+            const val = this.value.replace(/\D/g, '');
+            this.value = val;
+            const msg = document.getElementById('phoneValidation');
+            if (val.length !== 10) {
+                msg.textContent = "Please enter a valid 10-digit phone number.";
+                msg.style.color = "#d32f2f";
+                return;
+            }
+            // AJAX check for duplicate phone
+            fetch('/api/check-phone', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone: val })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.exists) {
+                    msg.textContent = "This phone number is already registered. Please use a different phone number.";
+                    msg.style.color = "#d32f2f";
+                } else {
+                    msg.textContent = "Phone number is available!";
+                    msg.style.color = "#388e3c";
+                }
+            });
+        });
+
+        document.getElementById('password').addEventListener('input', function() {
+            const val = this.value;
+            const msg = document.getElementById('passwordValidation');
+            if (val.length < 6) {
+                msg.textContent = "Password must be at least 6 characters long.";
+                msg.style.color = "#d32f2f";
+            } else {
+                msg.textContent = "";
+            }
+        });
+
+        // Signup handler
+        document.getElementById('signupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const form = e.target;
+            const btn = form.querySelector('.submit-btn');
+            const originalText = btn.textContent;
+            btn.textContent = 'Creating Account...';
+            btn.disabled = true;
+            btn.style.background = 'rgba(40, 167, 69, 0.95)';
+            btn.style.color = '#fff';
+            // Collect values
+            const full_name = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const password = document.getElementById('password').value;
+            // Final validation before submit
+            if (full_name.length < 2) {
+                showMessage("Please enter a valid full name (at least 2 characters).", "error", form);
+                btn.textContent = originalText;
+                btn.disabled = false;
+                return;
+            }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                showMessage("Please enter a valid email address.", "error", form);
+                btn.textContent = originalText;
+                btn.disabled = false;
+                return;
+            }
+            if (phone.length !== 10) {
+                showMessage("Please enter a valid 10-digit phone number.", "error", form);
+                btn.textContent = originalText;
+                btn.disabled = false;
+                return;
+            }
+            if (password.length < 6) {
+                showMessage("Password must be at least 6 characters long.", "error", form);
+                btn.textContent = originalText;
+                btn.disabled = false;
+                return;
+            }
+            fetch('/api/signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ full_name, email, phone, password })
+            })
+            .then(res => res.json())
+            .then(data => {
+                btn.textContent = originalText;
+                btn.disabled = false;
+                btn.style.background = 'rgba(255, 255, 255, 0.95)';
+                btn.style.color = '#ff6b35';
+                if (data.success) {
+                    showMessage('Account created! Redirecting...', 'success', form);
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 1200);
+                } else {
+                    showMessage(data.message || 'Signup failed.', 'error', form);
+                }
+            })
+            .catch(() => {
+                btn.textContent = originalText;
+                btn.disabled = false;
+                btn.style.background = 'rgba(255, 255, 255, 0.95)';
+                btn.style.color = '#ff6b35';
+                showMessage('Error creating account. Please try again.', 'error', form);
+            });
+        });
+
+        // Login handler
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const form = e.target;
+            const btn = form.querySelector('.submit-btn');
+            const originalText = btn.textContent;
+            btn.textContent = 'Signing In...';
+            btn.disabled = true;
+            btn.style.background = 'rgba(40, 167, 69, 0.95)';
+            btn.style.color = '#fff';
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            if (!email || !password) {
+                showMessage('Please fill in all fields.', 'error', form);
+                btn.textContent = originalText;
+                btn.disabled = false;
+                return;
+            }
+            fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            })
+            .then(res => res.json())
+            .then(data => {
+                btn.textContent = originalText;
+                btn.disabled = false;
+                btn.style.background = 'rgba(255, 255, 255, 0.95)';
+                btn.style.color = '#ff6b35';
+                if (data.success) {
+                    showMessage('Sign in successful! Redirecting...', 'success', form);
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 1200);
+                } else {
+                    showMessage(data.message || 'Sign in failed.', 'error', form);
+                }
+            })
+            .catch(() => {
+                btn.textContent = originalText;
+                btn.disabled = false;
+                btn.style.background = 'rgba(255, 255, 255, 0.95)';
+                btn.style.color = '#ff6b35';
+                showMessage('Error signing in. Please try again.', 'error', form);
+            });
+        });
+
+        function togglePassword(inputId, btn) {
+            const input = document.getElementById(inputId);
+            const icon = btn.querySelector('i');
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = "password";
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        // Add floating animation to form on load
+        window.addEventListener('load', function() {
+            const container = document.getElementById('authContainer');
+            container.style.transform = 'translateY(-20px)';
+            container.style.opacity = '0';
+            setTimeout(() => {
+                container.style.transition = 'all 0.8s ease';
+                container.style.transform = 'translateY(0)';
+                container.style.opacity = '1';
+            }, 100);
+        });
+        // Add ripple effect to buttons
+        document.querySelectorAll('.submit-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                const ripple = document.createElement('span');
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+                ripple.style.cssText = `
+                    position: absolute;
+                    width: ${size}px;
+                    height: ${size}px;
+                    left: ${x}px;
+                    top: ${y}px;
+                    background: rgba(255, 107, 53, 0.3);
+                    border-radius: 50%;
+                    transform: scale(0);
+                    animation: ripple 0.6s linear;
+                    pointer-events: none;
+                `;
+                this.appendChild(ripple);
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            });
+        });
+        // Add CSS for ripple animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
